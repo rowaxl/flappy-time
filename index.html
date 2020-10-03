@@ -8,14 +8,31 @@
     <script src="script/script.js" charset="utf-8"></script>
 </head>
 <body>
-    <div class="border-left"></div>
     <div class="game-container">
+        <div class="overlay"></div>
         <div class="border-top"></div>
         <div class="sky">
             <div class="bird"></div>
         </div>
         <div class="ground"></div>
+        <div class="game-start-wrap">
+            <div class="banner">
+                <h1>Flapy Time!</h1>
+
+                <button id="btn-start">
+                    Start!
+                </button>
+            </div>
+        </div>
+        <div class="game-over-wrap hide">
+            <div class="banner">
+                <h1>GAME OVER</h1>
+
+                <button id="btn-retry">
+                    Retry?
+                </button>
+            </div>
+        </div>
     </div>
-    <div class="border-right"></div>
 </body>
 </html>

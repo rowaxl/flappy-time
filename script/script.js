@@ -1,78 +1,158 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const bird = document.querySelector('.bird');
-    const gameDisplay = document.querySelector('.game-container');
-    const ground = document.querySelector('.ground');
-    
-    let birdLeft = 220;
-    let birdBottom = 100;
-    let gravity = 2;
     let isGameOver = false;
-    let gap = 430;
+    const container = document.querySelector('.game-container');
+    const bird = container.querySelector('.bird');
+    const sky = container.querySelector('.sky');
+    const overlay = container.querySelector('.overlay');
 
-    function starGame() {
-        birdBottom -= gravity;
-        bird.style.bottom = birdBottom + 'px';
-        bird.style.left = birdLeft + 'px';
+    const startButton = container.querySelector('#btn-start');
+    const retryButton = container.querySelector('#btn-retry');
+
+    const initialBirdLeft = 100;
+    const initialBirdBottom = sky.offsetHeight / 2;
+    const birdPosition = {
+        left: initialBirdLeft,
+        bottom: initialBirdBottom,
+    };
+
+    const borders = {
+        top: sky.offsetHeight,
+        bottom: 0,
+        left: 0,
+        right: sky.offsetWidth - bird.offsetWidth,
     }
-    let gameTimerId = setInterval(starGame, 20);
 
-    function control(e) {
-        if (e.keyCode === 32) {
-            jump();
+    const gravity = 2;
+    const gap = 500;
+
+    function updateBirdPosition() {
+        // when bird touched ground
+        if (birdPosition.bottom <= borders.bottom) {
+            gameOver();
+            return;
+        }
+
+        birdPosition.bottom -= gravity;
+        bird.style.bottom = `${birdPosition.bottom}px`;
+        bird.style.left = `${birdPosition.left}px`;
+    }
+
+    function handleKeyup(e) {
+        switch (e.code) {
+            case 'ArrowUp':
+                jump();
+                break;
+            case 'ArrowDown':
+                dive();
+                break;
+            default:
+                break;
         }
     }
 
     function jump() {
-        if (birdBottom < 500) birdBottom += 40;
-        bird.style.bottom = birdBottom  + 'px';
+        if (birdPosition.bottom + bird.offsetHeight > borders.top) return;
+    
+        birdPosition.bottom += 30;
+        bird.style.bottom = `${birdPosition.bottom}px`;
     }
-    document.addEventListener('keyup', control);
+
+    function dive() {
+        if (birdPosition.bottom <= borders.bottom + 20) return;
+    
+        birdPosition.bottom -= 20;
+        bird.style.bottom = `${birdPosition.bottom}px`;
+    }
 
     function generateObstacle() {
-        let obstacleLeft = 500;
-        let randomHeight = Math.random() * 60;
-        let obstacleBottom = randomHeight;
-        const obstacle = document.createElement('div');
+        const obstaclePosition = {
+            left: sky.offsetWidth, // start from right side of screen
+            bottom: Math.floor(Math.random() * 60),
+        };
+
+        const bottomObstacle = document.createElement('div');
         const topObstacle = document.createElement('div');
-        
+
         if (!isGameOver) {
-            obstacle.classList.add('obstacle');
-            topObstacle.classList.add('topObstacle');
+            bottomObstacle.classList.add('obstacle');
+            topObstacle.classList.add('obstacle');
+            topObstacle.classList.add('top');
         }
-        gameDisplay.appendChild(obstacle);
-        gameDisplay.appendChild(topObstacle);
-        
-        obstacle.style.left = obstacleLeft + 'px';
-        topObstacle.style.left = obstacleLeft + 'px';
-        obstacle.style.bottom= obstacleBottom + 'px';
-        topObstacle.style.bottom= obstacleBottom + gap + 'px';
+
+        sky.appendChild(bottomObstacle);
+        sky.appendChild(topObstacle);
+
+        bottomObstacle.style.left = `${obstaclePosition.left}px`;
+        topObstacle.style.left = `${obstaclePosition.left}px`;
+        bottomObstacle.style.height = `${bottomObstacle.offsetHeight + obstaclePosition.bottom}px`;
+        bottomObstacle.style.bottom = `0px`;
+        topObstacle.style.bottom = `${obstaclePosition.bottom + gap}px`;
 
         function moveObstacle() {
-            obstacleLeft -= 2;
-            obstacle.style.left = obstacleLeft + 'px';
-            topObstacle.style.left = obstacleLeft + 'px';
+            obstaclePosition.left -= 2;
+            bottomObstacle.style.left = `${obstaclePosition.left}px`;
+            topObstacle.style.left = `${obstaclePosition.left}px`;
 
-            if(obstacleLeft === -60) {
-                clearInterval(timerId);
-                gameDisplay.removeChild(obstacle);
-                gameDisplay.removeChild(topObstacle);
+            if (obstaclePosition.left + bottomObstacle.offsetWidth <= borders.left) {
+                clearInterval(moveLeft);
+                sky.removeChild(bottomObstacle);
+                sky.removeChild(topObstacle);
             }
-            if(
-                obstacleLeft > 200 && obstacleLeft < 280 && birdLeft === 220 && 
-                (birdBottom < obstacleBottom + 153 || birdBottom > obstacleBottom + gap - 200)
-                || birdBottom === 0) {
+
+            if (isGameOver) {
+                clearInterval(moveLeft);
+            }
+
+            if(isBumped(obstaclePosition.left, bottomObstacle.offsetWidth, obstaclePosition.bottom + gap, bottomObstacle.offsetHeight)) {
                 gameOver();
-                clearInterval(timerId);
+                clearInterval(moveLeft);
             }
         }
-        let timerId = setInterval(moveObstacle, 20);
-        if (!isGameOver) setTimeout(generateObstacle, 3000);
+
+         // calculate bird's hitbox
+        function isBumped(obstacleLeft, obstacleWidth, gapTop, gapBottom) {
+            const hitRight = birdPosition.left + bird.offsetWidth >= obstacleLeft;
+            const hitLeft = birdPosition.left < obstacleLeft + obstacleWidth;
+
+            const hitTop = birdPosition.bottom + bird.offsetHeight >= gapTop;
+            const hitBottom = birdPosition.bottom <= gapBottom;
+
+            return (hitRight && hitLeft && hitTop) || (hitRight && hitLeft && hitBottom);
+        }
+
+        let moveLeft = setInterval(moveObstacle, 20);
+        if (!isGameOver) setTimeout(generateObstacle, 2000);
     }
-    generateObstacle();
 
     function gameOver() {
         clearInterval(gameTimerId);
         isGameOver = true;
-        document.removeEventListener('keyup', control);
+        document.removeEventListener('keyup', handleKeyup);
+
+        document.querySelector('.game-over-wrap').classList.remove('hide');
+        overlay.classList.remove('hide');
     }
+
+    let gameTimerId = null;
+
+    function startGame() {
+        document.querySelector('.game-start-wrap').classList.add('hide');
+        document.querySelectorAll('.obstacle').forEach(obstacle => obstacle.remove());
+
+        birdPosition.left = initialBirdLeft;
+        birdPosition.bottom = initialBirdBottom;
+
+        overlay.classList.add('hide');
+        gameTimerId = setInterval(updateBirdPosition, 20);
+        document.addEventListener('keyup', handleKeyup);
+        generateObstacle();
+    }
+
+    startButton.addEventListener('click', startGame);
+
+    retryButton.addEventListener('click', () => {
+        document.querySelector('.game-over-wrap').classList.add('hide');
+        isGameOver = false;
+        startGame();
+    });
 })
