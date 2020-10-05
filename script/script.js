@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'ArrowDown':
                 dive();
                 break;
+            case 'ArrowLeft':
+                moveLeft();
+                break;
+            case 'ArrowRight':
+                moveRight();
+                break;
             default:
                 break;
         }
@@ -63,6 +69,22 @@ document.addEventListener('DOMContentLoaded', () => {
         birdPosition.bottom -= 20;
         bird.style.bottom = `${birdPosition.bottom}px`;
     }
+
+    function moveLeft() {
+        if (birdPosition.left <= borders.left) return;
+    
+        birdPosition.left -= 20;
+        bird.style.left = `${birdPosition.left}px`;
+    }
+
+    function moveRight() {
+        if (birdPosition.left + bird.offsetWidth >= borders.right) return;
+
+        birdPosition.left += 20;
+        bird.style.left = `${birdPosition.left}px`;
+    }
+
+    let generateObstacleId = null;
 
     function generateObstacle() {
         const obstaclePosition = {
@@ -121,13 +143,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let moveLeft = setInterval(moveObstacle, 20);
-        if (!isGameOver) setTimeout(generateObstacle, 2000);
+        if (!isGameOver) {
+            generateObstacleId = setTimeout(generateObstacle, 2000);
+        }
     }
 
     function gameOver() {
         clearInterval(gameTimerId);
+        clearTimeout(generateObstacleId);
         isGameOver = true;
         document.removeEventListener('keyup', handleKeyup);
+        document.removeEventListener('keydown', handleKeyup);
 
         document.querySelector('.game-over-wrap').classList.remove('hide');
         overlay.classList.remove('hide');
@@ -145,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.add('hide');
         gameTimerId = setInterval(updateBirdPosition, 20);
         document.addEventListener('keyup', handleKeyup);
+        document.addEventListener('keydown', handleKeyup);
         generateObstacle();
     }
 
