@@ -1,6 +1,7 @@
 # It's Flappy Time!
 
 ## Overview
+![](overview.gif)
 JS based web game for WAMD cource project.
 Basic ideas from [Code with Ania Kubów](https://www.youtube.com/channel/UC5DNytAJ6_FISueUfzZCVsw)
 
