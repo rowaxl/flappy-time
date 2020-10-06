@@ -25,6 +25,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const gravity = 2;
     const gap = 500;
 
+    const actions = {
+        'ArrowUp': jump,
+        'ArrowDown': dive,
+        'ArrowLeft': moveLeft,
+        'ArrowRight': moveRight,
+    }
+
     function updateBirdPosition() {
         // when bird touched ground
         if (birdPosition.bottom <= borders.bottom) {
@@ -37,29 +44,17 @@ document.addEventListener('DOMContentLoaded', () => {
         bird.style.left = `${birdPosition.left}px`;
     }
 
-    function handleKeyup(e) {
-        switch (e.code) {
-            case 'ArrowUp':
-                jump();
-                break;
-            case 'ArrowDown':
-                dive();
-                break;
-            case 'ArrowLeft':
-                moveLeft();
-                break;
-            case 'ArrowRight':
-                moveRight();
-                break;
-            default:
-                break;
-        }
+    function handleMove(e) {
+        const action = actions[e.code];
+
+        if (!action) return;
+        action()
     }
 
     function jump() {
         if (birdPosition.bottom + bird.offsetHeight > borders.top) return;
     
-        birdPosition.bottom += 30;
+        birdPosition.bottom += 50;
         bird.style.bottom = `${birdPosition.bottom}px`;
     }
 
@@ -132,12 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
          // calculate bird's hitbox
-        function isBumped(obstacleLeft, obstacleWidth, gapTop, gapBottom) {
-            const hitRight = birdPosition.left + bird.offsetWidth >= obstacleLeft;
-            const hitLeft = birdPosition.left < obstacleLeft + obstacleWidth;
+        function isBumped(targetLeft, targetWidth, targetTop, targetBottom) {
+            const hitRight = birdPosition.left + bird.offsetWidth >= targetLeft;
+            const hitLeft = birdPosition.left < targetLeft + targetWidth;
 
-            const hitTop = birdPosition.bottom + bird.offsetHeight >= gapTop;
-            const hitBottom = birdPosition.bottom <= gapBottom;
+            const hitTop = birdPosition.bottom + bird.offsetHeight >= targetTop;
+            const hitBottom = birdPosition.bottom <= targetBottom;
 
             return (hitRight && hitLeft && hitTop) || (hitRight && hitLeft && hitBottom);
         }
@@ -152,8 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(gameTimerId);
         clearTimeout(generateObstacleId);
         isGameOver = true;
-        document.removeEventListener('keyup', handleKeyup);
-        document.removeEventListener('keydown', handleKeyup);
+        document.removeEventListener('keyup', handleMove);
+        document.removeEventListener('keypress', handleMove);
 
         document.querySelector('.game-over-wrap').classList.remove('hide');
         overlay.classList.remove('hide');
@@ -170,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         overlay.classList.add('hide');
         gameTimerId = setInterval(updateBirdPosition, 20);
-        document.addEventListener('keyup', handleKeyup);
-        document.addEventListener('keydown', handleKeyup);
+        document.addEventListener('keyup', handleMove);
+        document.addEventListener('keypress', handleMove);
         generateObstacle();
     }
 
