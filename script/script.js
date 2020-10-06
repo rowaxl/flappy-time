@@ -25,6 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const gravity = 2;
     const gap = 500;
 
+    let gameTimerId = null;
+    let generateObstacleId = null;
+
     const actions = {
         'ArrowUp': jump,
         'ArrowDown': dive,
@@ -78,8 +81,6 @@ document.addEventListener('DOMContentLoaded', () => {
         birdPosition.left += 20;
         bird.style.left = `${birdPosition.left}px`;
     }
-
-    let generateObstacleId = null;
 
     function generateObstacle() {
         const obstaclePosition = {
@@ -138,9 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let moveLeft = setInterval(moveObstacle, 20);
-        if (!isGameOver) {
-            generateObstacleId = setTimeout(generateObstacle, 2000);
-        }
+        if (!isGameOver) generateObstacleId = setTimeout(generateObstacle, 2000);
     }
 
     function gameOver() {
@@ -148,13 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(generateObstacleId);
         isGameOver = true;
         document.removeEventListener('keyup', handleMove);
-        document.removeEventListener('keypress', handleMove);
+        document.removeEventListener('keydown', handleMove);
 
         document.querySelector('.game-over-wrap').classList.remove('hide');
         overlay.classList.remove('hide');
     }
-
-    let gameTimerId = null;
 
     function startGame() {
         document.querySelector('.game-start-wrap').classList.add('hide');
@@ -166,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.add('hide');
         gameTimerId = setInterval(updateBirdPosition, 20);
         document.addEventListener('keyup', handleMove);
-        document.addEventListener('keypress', handleMove);
+        document.addEventListener('keydown', handleMove);
         generateObstacle();
     }
 
