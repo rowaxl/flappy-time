@@ -1,36 +1,27 @@
-.body {
-    display: flex;
+html {
+    box-sizing: border-box;
 }
-.game-container {
-    width: 500px;
-    height: 730px;
-    position: absolute;
-    left: 80px;
-}
-.border-left {
-    width: 80px;
-    height: 790px;
-    position: absolute;
-    background-color: white;
-    z-index: +2;
 
+*, *::before, *::after {
+    box-sizing: inherit;
 }
-.border-right {
-    width: 80px;
-    height: 790px;
-    position: absolute;
-    background-color: white;
-    z-index: +2;
-    left: 580px;
+
+body {
+    display: flex;
+    margin: 0;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
 }
-.border-top {
-    width: 660px;
-    height: 50px;
-    position: absolute;
-    background-color: white;
-    z-index: +2;
-    top: -50px;
+
+.game-container {
+    min-width: 360px;
+    width: 100%;
+    max-width: 1280px;
+    height: 768px;
+    position: relative;
 }
+
 .sky {
     background: url(../images/frappyBird-sky.png) no-repeat;
     background-size: cover;
@@ -38,7 +29,9 @@
     width: 100%;
     height: calc(100% - 150px);
     position: absolute;
+    overflow: hidden;
 }
+
 .ground {
     background:url(../images/frappyBird-ground.png) no-repeat;
     background-size: cover;
@@ -46,9 +39,10 @@
     width: 100%;
     height: 150px;
     position: absolute;
-    top: 580px;
-    z-index: +1;
+    bottom: 0;
+    z-index: 1;
 }
+
 .bird {
     background: url(../images/frappyBird-bird.png) no-repeat;
     background-size: cover;
@@ -59,6 +53,7 @@
     bottom: 50%;
     left: 100px;
 }
+
 .obstacle {
     background: url(../images/frappyBird-pipe.png) no-repeat;
     background-size: cover;
@@ -76,4 +71,61 @@
     width: 60px;
     height: 300px;
     position: absolute;
+}
+
+.hide {
+    display: none;
+    opacity: 0;
+}
+
+.game-start-wrap,
+.game-over-wrap {
+    transition: all 300ms ease-in-out;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 11;
+    display: flex;
+    place-content: center;
+    place-items: center;
+}
+
+.overlay {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.58);
+    z-index: 10;
+}
+
+.banner {
+    width: 50%;
+    height: 150px;
+    text-align: center;
+    z-index: 12;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+.game-start-wrap .banner {
+    border: 1px skyblue solid;
+    color: skyblue;
+}
+
+.game-over-wrap .banner {
+    border: 1px red solid;
+    color: red;
+}
+
+.banner button {
+    border: none;
+    box-shadow: 1px 1px 3px 0 #555;
+    padding: 10px 25px;
+    background-color: black;
+    color: #fff;
+    font-size: 1.2rem;
+    transition: background-color 100ms ease;
+}
+
+.game-over-wrap .banner button:hover {
+    background-color: #999;
 }
